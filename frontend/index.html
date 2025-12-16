@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>HireMind AI · Entrevistador</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "hm-bg": "#020617",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      body {
+        background: radial-gradient(circle at top, #111827, #020617 60%);
+      }
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #4b5563;
+        border-radius: 999px;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen text-slate-50">
+    <div class="min-h-screen flex">
+      <!-- ===================================== -->
+      <!-- NAVBAR LATERAL ESQUERDA              -->
+      <!-- ===================================== -->
+      <aside
+        class="w-16 md:w-20 border-r border-slate-800 bg-black/90 flex flex-col items-center py-4 gap-3"
+      >
+        <div
+          class="w-10 h-10 rounded-full bg-gradient-to-br from-white via-emerald-300 to-emerald-500 flex items-center justify-center font-black text-slate-900 mb-2"
+        >
+          H
+        </div>
+
+        <button
+          class="w-9 h-9 rounded-full bg-slate-900/90 border border-slate-700 flex items-center justify-center text-lg"
+          title="Dashboard"
+        >
+          📊
+        </button>
+        <button
+          class="w-9 h-9 rounded-full bg-slate-900/90 border border-slate-700 flex items-center justify-center text-lg"
+          title="Treinamento"
+        >
+          💬
+        </button>
+        <button
+          class="w-9 h-9 rounded-full bg-slate-900/90 border border-slate-700 flex items-center justify-center text-lg"
+          title="Histórico"
+        >
+          📁
+        </button>
+        <button
+          class="w-9 h-9 rounded-full bg-slate-900/90 border border-slate-700 flex items-center justify-center text-lg"
+          title="Configurações"
+        >
+          ⚙️
+        </button>
+
+        <div class="mt-auto text-[10px] text-slate-500 text-center px-1">
+          v0.1 · mock demo
+        </div>
+      </aside>
+
+      <!-- ===================================== -->
+      <!-- MAIN AREA (Dashboard + Training)     -->
+      <!-- ===================================== -->
+      <div class="flex-1 flex flex-col">
+        <!-- ========== DASHBOARD ========== -->
+        <div
+          id="dashboard-screen"
+          class="max-w-6xl mx-auto px-4 py-6 space-y-6"
+        >
+          <!-- Header -->
+          <header
+            class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+          >
+            <div class="flex items-center gap-3">
+              <div
+                class="w-11 h-11 rounded-full bg-gradient-to-br from-white via-emerald-300 to-emerald-500 flex items-center justify-center font-black text-slate-900"
+              >
+                H
+              </div>
+              <div>
+                <h1
+                  class="text-sm tracking-[0.18em] uppercase text-slate-200 font-semibold"
+                >
+                  HireMind AI
+                </h1>
+                <p class="text-xs text-slate-400">
+                  Dashboard de treino de entrevistas com LLaMA 3
+                </p>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <button
+                class="px-3 py-1.5 rounded-full text-[11px] border border-slate-700/80 bg-slate-900/80 text-slate-300"
+                type="button"
+              >
+                Modo <span class="font-semibold">Mock Interview</span>
+              </button>
+              <button
+                class="px-3 py-1.5 rounded-full text-[11px] border border-slate-700/80 bg-slate-900/80 text-slate-300"
+                type="button"
+              >
+                Perfil <span class="font-semibold">Dev Jr</span>
+              </button>
+              <button
+                data-start-training
+                class="px-4 py-1.5 rounded-full text-[11px] font-semibold bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/40"
+                type="button"
+              >
+                Iniciar treinamento
+              </button>
+            </div>
+          </header>
+
+          <!-- Intro -->
+          <section
+            class="rounded-2xl border border-slate-700/80 bg-slate-950/70 px-5 py-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between"
+          >
+            <div>
+              <p
+                class="text-[11px] uppercase tracking-[0.2em] text-slate-400 mb-1"
+              >
+                Visão geral (mock)
+              </p>
+              <h2 class="text-base font-semibold">
+                Seu laboratório de entrevistas técnicas
+              </h2>
+              <p class="text-xs text-slate-400 mt-1 max-w-xl">
+                Esses dados são apenas um mock para demonstrar o tipo de visão
+                que você poderia ter após várias sessões reais de treino com a
+                IA.
+              </p>
+            </div>
+            <div
+              class="flex items-center gap-3 text-xs text-slate-300 mt-3 md:mt-0"
+            >
+              <div class="text-right">
+                <p class="text-slate-400">Último treino</p>
+                <p class="font-semibold">Ontem · 23 min</p>
+              </div>
+              <div
+                class="w-10 h-10 rounded-full bg-emerald-400/15 border border-emerald-400/70 flex items-center justify-center text-emerald-200"
+              >
+                ●
+              </div>
+            </div>
+          </section>
+
+          <!-- Cards + Charts -->
+          <section class="grid gap-4 lg:grid-cols-3">
+            <!-- Card 1: sessões -->
+            <article
+              class="rounded-2xl border border-slate-700/80 bg-slate-950/85 p-4 flex flex-col gap-3"
+            >
+              <div class="flex items-center justify-between">
+                <h3
+                  class="text-[11px] uppercase tracking-[0.18em] text-slate-400"
+                >
+                  Sessões concluídas
+                </h3>
+                <span
+                  class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-400/50"
+                  >Mock</span
+                >
+              </div>
+              <div class="flex items-end gap-2">
+                <span class="text-2xl font-semibold">18</span>
+                <span class="text-[11px] text-slate-400 mb-1"
+                  >entrevistas praticadas</span
+                >
+              </div>
+
+              <!-- mini gráfico de barras -->
+              <div class="mt-1 flex items-end gap-1 h-20">
+                <div
+                  class="flex-1 bg-slate-800/80 rounded-full overflow-hidden flex items-end justify-center"
+                >
+                  <div class="w-2/3 bg-emerald-400/80 rounded-t-full h-2/5"></div>
+                </div>
+                <div
+                  class="flex-1 bg-slate-800/80 rounded-full overflow-hidden flex items-end justify-center"
+                >
+                  <div class="w-2/3 bg-emerald-400/80 rounded-t-full h-3/5"></div>
+                </div>
+                <div
+                  class="flex-1 bg-slate-800/80 rounded-full overflow-hidden flex items-end justify-center"
+                >
+                  <div class="w-2/3 bg-emerald-400/80 rounded-t-full h-4/5"></div>
+                </div>
+                <div
+                  class="flex-1 bg-slate-800/80 rounded-full overflow-hidden flex items-end justify-center"
+                >
+                  <div class="w-2/3 bg-emerald-400/80 rounded-t-full h-[90%]"></div>
+                </div>
+              </div>
+              <p class="text-[11px] text-slate-400">
+                Crescimento de prática ao longo da última semana.
+              </p>
+            </article>
+
+            <!-- Card 2: stack foco -->
+            <article
+              class="rounded-2xl border border-slate-700/80 bg-slate-950/85 p-4 flex flex-col gap-3"
+            >
+              <div class="flex items-center justify-between">
+                <h3
+                  class="text-[11px] uppercase tracking-[0.18em] text-slate-400"
+                >
+                  Foco das perguntas
+                </h3>
+              </div>
+
+              <!-- gráfico de donut fake -->
+              <div class="flex items-center gap-4">
+                <div
+                  class="relative w-20 h-20 rounded-full bg-slate-800/90 flex items-center justify-center"
+                >
+                  <div
+                    class="absolute inset-1 rounded-full bg-slate-950/95"
+                  ></div>
+                  <svg
+                    class="w-full h-full rotate-[-90deg]"
+                    viewBox="0 0 32 32"
+                  >
+                    <circle
+                      cx="16"
+                      cy="16"
+                      r="14"
+                      stroke="rgba(56,189,248,0.9)"
+                      stroke-width="3"
+                      stroke-dasharray="40 60"
+                      fill="transparent"
+                    ></circle>
+                    <circle
+                      cx="16"
+                      cy="16"
+                      r="14"
+                      stroke="rgba(52,211,153,0.9)"
+                      stroke-width="3"
+                      stroke-dasharray="25 75"
+                      stroke-dashoffset="-40"
+                      fill="transparent"
+                    ></circle>
+                  </svg>
+                  <span class="absolute text-[11px] text-slate-100">Mock</span>
+                </div>
+                <div class="text-[11px] space-y-1">
+                  <p class="text-slate-300">
+                    <span
+                      class="inline-block w-2 h-2 rounded-full bg-sky-400 mr-1"
+                    ></span>
+                    52% perguntas técnicas (JS / React)
+                  </p>
+                  <p class="text-slate-300">
+                    <span
+                      class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-1"
+                    ></span>
+                    35% comportamentais
+                  </p>
+                  <p class="text-slate-400">
+                    13% gerais (cultura, expectativas, salário)
+                  </p>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 3: recomendações -->
+            <article
+              class="rounded-2xl border border-slate-700/80 bg-slate-950/85 p-4 flex flex-col gap-3"
+            >
+              <div class="flex items-center justify-between">
+                <h3
+                  class="text-[11px] uppercase tracking-[0.18em] text-slate-400"
+                >
+                  Recomendações da IA
+                </h3>
+              </div>
+              <ul class="text-[11px] text-slate-300 space-y-1">
+                <li>• Trabalhar exemplos de projetos pessoais.</li>
+                <li>
+                  • Reforçar respostas sobre trabalho em equipe e feedbacks
+                  recebidos.
+                </li>
+                <li>
+                  • Treinar apresentação inicial (“Quem é você?”) em 60 segundos.
+                </li>
+              </ul>
+              <button
+                data-start-training
+                class="mt-2 self-start px-3 py-1.5 rounded-full text-[11px] font-semibold bg-emerald-400 text-slate-900 shadow-md shadow-emerald-500/40"
+              >
+                Começar agora
+              </button>
+            </article>
+          </section>
+        </div>
+
+        <!-- ========== TREINAMENTO / CHAT ========== -->
+        <div
+          id="training-screen"
+          class="hidden max-w-6xl mx-auto px-4 py-6 space-y-4"
+        >
+          <!-- topo -->
+          <header
+            class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+          >
+            <div>
+              <button
+                id="back-dashboard"
+                type="button"
+                class="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-200"
+              >
+                ← Voltar para dashboard
+              </button>
+              <h2
+                class="mt-1 text-lg font-semibold tracking-[0.18em] uppercase text-slate-100"
+              >
+                Sessão de treinamento
+              </h2>
+              <p class="text-xs text-slate-400 mt-1 max-w-xl">
+                Configure a vaga e treine com a IA como se estivesse em uma
+                entrevista real. As estatísticas ao lado são atualizadas conforme
+                você responde.
+              </p>
+            </div>
+
+            <div
+              class="px-3 py-1.5 rounded-full text-[11px] border border-emerald-400/60 bg-emerald-400/10 text-emerald-200 flex items-center gap-2"
+            >
+              <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+              LLaMA 3 · sessão ativa
+            </div>
+          </header>
+
+          <!-- grid -->
+          <main
+            class="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] items-start"
+          >
+            <!-- Config -->
+            <section
+              class="bg-slate-950/80 border border-slate-700/80 rounded-2xl p-4 space-y-4"
+            >
+              <div>
+                <p
+                  class="text-[11px] uppercase tracking-[0.2em] text-slate-400 mb-1"
+                >
+                  Passo 1
+                </p>
+                <h3 class="text-sm font-semibold">Configuração da sessão</h3>
+                <p class="text-xs text-slate-400 mt-1">
+                  Esses dados ajudam a IA a adaptar perguntas e exemplos ao tipo
+                  de vaga que você quer.
+                </p>
+              </div>
+
+              <div class="space-y-3">
+                <label class="block text-xs space-y-1">
+                  <span class="text-slate-300">Cargo desejado</span>
+                  <input
+                    id="role-input"
+                    type="text"
+                    placeholder="Ex.: Desenvolvedor Front-end Jr"
+                    class="w-full rounded-full border border-slate-600/70 bg-slate-900/80 px-3 py-2 text-xs text-slate-50 placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400"
+                  />
+                </label>
+
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <label class="block text-xs space-y-1">
+                    <span class="text-slate-300">Nível</span>
+                    <select
+                      id="level-select"
+                      class="w-full rounded-full border border-slate-600/70 bg-slate-900/80 px-3 py-2 text-xs text-slate-50 outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400"
+                    >
+                      <option value="junior">Júnior</option>
+                      <option value="pleno">Pleno</option>
+                      <option value="senior">Sênior</option>
+                    </select>
+                  </label>
+
+                  <label class="block text-xs space-y-1">
+                    <span class="text-slate-300">Área / contexto</span>
+                    <input
+                      id="area-input"
+                      type="text"
+                      placeholder="Ex.: tecnologia, suporte, vendas"
+                      class="w-full rounded-full border border-slate-600/70 bg-slate-900/80 px-3 py-2 text-xs text-slate-50 placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400"
+                    />
+                  </label>
+                </div>
+
+                <label class="block text-xs space-y-1">
+                  <span class="text-slate-300">Estilo da entrevista</span>
+                  <select
+                    id="style-select"
+                    class="w-full rounded-full border border-slate-600/70 bg-slate-900/80 px-3 py-2 text-xs text-slate-50 outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400"
+                  >
+                    <option value="equilibrado">
+                      Equilibrado (técnico + comportamental)
+                    </option>
+                    <option value="tecnico">Mais técnico</option>
+                    <option value="comportamental">
+                      Mais comportamental
+                    </option>
+                  </select>
+                </label>
+              </div>
+
+              <button
+                id="start-btn"
+                type="button"
+                class="mt-2 w-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 text-xs font-semibold py-2 shadow-lg shadow-emerald-500/40"
+              >
+                Começar entrevista
+              </button>
+
+              <div class="mt-4 grid grid-cols-2 gap-3 text-[11px] text-slate-300">
+                <div
+                  class="rounded-xl border border-slate-700/80 bg-slate-900/80 px-3 py-2"
+                >
+                  <p class="text-slate-400">Perguntas respondidas</p>
+                  <p id="stat-answers" class="mt-1 text-lg font-semibold">0</p>
+                </div>
+                <div
+                  class="rounded-xl border border-slate-700/80 bg-slate-900/80 px-3 py-2"
+                >
+                  <p class="text-slate-400">Feedbacks da IA</p>
+                  <p id="stat-feedbacks" class="mt-1 text-lg font-semibold">0</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- Chat -->
+            <section
+              class="bg-slate-950/90 border border-slate-700/80 rounded-2xl p-4 flex flex-col"
+            >
+              <header
+                class="flex items-start justify-between gap-3 mb-3 border-b border-slate-700/80 pb-3"
+              >
+                <div>
+                  <p
+                    class="text-[11px] uppercase tracking-[0.2em] text-slate-400 mb-1"
+                  >
+                    Entrevista ativa
+                  </p>
+                  <h3 class="text-sm font-semibold">Entrevistador IA</h3>
+                  <p class="text-xs text-slate-400 mt-1">
+                    Responda como se estivesse em uma entrevista real. A IA
+                    avalia e segue com a próxima pergunta.
+                  </p>
+                </div>
+                <div
+                  class="flex items-center gap-2 px-2 py-1 rounded-full bg-slate-900/90 border border-slate-700/80 text-[10px] text-slate-300"
+                >
+                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  Sessão conectada
+                </div>
+              </header>
+
+              <div
+                id="messages"
+                class="flex-1 min-h-[220px] max-h-[420px] overflow-y-auto space-y-2 pr-1"
+              ></div>
+
+              <form
+                id="answer-form"
+                class="mt-3 flex flex-col gap-2 text-xs"
+              >
+                <textarea
+                  id="answer-input"
+                  rows="3"
+                  placeholder="Escreva sua resposta aqui..."
+                  class="w-full rounded-2xl border border-slate-700/80 bg-slate-900/90 px-3 py-2 text-xs text-slate-50 placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 resize-y min-h-[80px] max-h-[180px]"
+                ></textarea>
+
+                <div
+                  class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <span class="text-[11px] text-slate-400">
+                    Dica: cite contexto, ação e resultado. Exemplos concretos
+                    fortalecem sua resposta.
+                  </span>
+                  <button
+                    type="submit"
+                    class="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 text-xs font-semibold px-4 py-2 shadow-md shadow-emerald-500/40"
+                  >
+                    Enviar resposta
+                  </button>
+                </div>
+              </form>
+
+              <p id="status" class="mt-1 text-[11px] text-slate-400"></p>
+            </section>
+          </main>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODAL DE CONFIGURAÇÃO INICIAL ========== -->
+    <div
+      id="config-modal"
+      class="fixed inset-0 z-30 hidden"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div
+        id="config-backdrop"
+        class="absolute inset-0 bg-black/70 backdrop-blur-sm"
+      ></div>
+
+      <div
+        class="relative max-w-md w-full mx-auto mt-24 bg-slate-950/95 border border-slate-700/80 rounded-2xl p-5 shadow-2xl"
+      >
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <div>
+            <p
+              class="text-[11px] uppercase tracking-[0.2em] text-slate-400 mb-1"
+            >
+              Passo 1
+            </p>
+            <h2 class="text-sm font-semibold">
+              Configurar sessão de entrevista
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">
+              Essas informações serão usadas para gerar a primeira pergunta da
+              entrevista.
+            </p>
+          </div>
+          <button
+            id="modal-close-btn"
+            type="button"
+            class="w-8 h-8 rounded-full bg-slate-900/95 border border-slate-700 text-slate-400 text-sm"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="space-y-3 text-xs">
+          <label class="block space-y-1">
+            <span class="text-slate-300">Cargo desejado</span>
+            <input
+              id="modal-role"
+              type="text"
+              placeholder="Ex.: Desenvolvedor Front-end Jr"
+              class="w-full rounded-full border border-slate-600/70 bg-slate-900/80 px-3 py-2 text-xs text-slate-50 placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400"
+            />
+          </label>
+
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label class="block space-y-1">
+              <span class="text-slate-300">Nível</span>
+              <select
+                id="modal-level"
+                class="w-full rounded-full border border-slate-600/70 bg-slate-900/80 px-3 py-2 text-xs text-slate-50 outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400"
+              >
+                <option value="junior">Júnior</option>
+                <option value="pleno">Pleno</option>
+                <option value="senior">Sênior</option>
+              </select>
+            </label>
+
+            <label class="block space-y-1">
+              <span class="text-slate-300">Área / contexto</span>
+              <input
+                id="modal-area"
+                type="text"
+                placeholder="Ex.: tecnologia, suporte, vendas"
+                class="w-full rounded-full border border-slate-600/70 bg-slate-900/80 px-3 py-2 text-xs text-slate-50 placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400"
+              />
+            </label>
+          </div>
+
+          <label class="block space-y-1">
+            <span class="text-slate-300">Estilo da entrevista</span>
+            <select
+              id="modal-style"
+              class="w-full rounded-full border border-slate-600/70 bg-slate-900/80 px-3 py-2 text-xs text-slate-50 outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400"
+            >
+              <option value="equilibrado">
+                Equilibrado (técnico + comportamental)
+              </option>
+              <option value="tecnico">Mais técnico</option>
+              <option value="comportamental">Mais comportamental</option>
+            </select>
+          </label>
+
+          <p class="text-[11px] text-slate-400">
+            Você poderá ajustar essas informações novamente dentro da sessão, se
+            quiser.
+          </p>
+        </div>
+
+        <div class="mt-4 flex justify-end">
+          <button
+            id="modal-start-btn"
+            type="button"
+            class="rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 text-xs font-semibold px-4 py-2 shadow-lg shadow-emerald-500/40"
+          >
+            Começar entrevista
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
