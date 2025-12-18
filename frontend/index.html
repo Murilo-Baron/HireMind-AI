@@ -54,6 +54,7 @@
 
         <!-- Dashboard -->
         <button
+          data-nav="dashboard"
           class="group w-9 h-9 rounded-full bg-slate-950/80 border border-slate-700 flex items-center justify-center hover:border-emerald-400/80 hover:bg-emerald-400/10 transition"
           title="Dashboard"
         >
@@ -75,6 +76,7 @@
 
         <!-- Treinamento -->
         <button
+          data-nav="training"
           class="group w-9 h-9 rounded-full bg-slate-950/80 border border-slate-700 flex items-center justify-center hover:border-emerald-400/80 hover:bg-emerald-400/10 transition"
           title="Treinamento"
         >
@@ -390,11 +392,12 @@
                   <h3
                     class="text-[11px] uppercase tracking-[0.18em] text-slate-400"
                   >
-                    Evolução do treino (mock)
+                    Evolução do treino
                   </h3>
                   <p class="text-xs text-slate-400 mt-1">
                     Exemplo de como as entrevistas podem ser acompanhadas ao
-                    longo das semanas.
+                    longo das semanas. Os últimos pontos são atualizados com
+                    suas sessões reais.
                   </p>
                 </div>
               </div>
@@ -568,6 +571,27 @@
                   <p id="stat-feedbacks" class="mt-1 text-lg font-semibold">0</p>
                 </div>
               </div>
+
+              <!-- Score da sessão -->
+              <div class="mt-3 grid grid-cols-2 gap-3 text-[11px] text-slate-300">
+                <div
+                  class="rounded-xl border border-slate-700/80 bg-slate-900/80 px-3 py-2"
+                >
+                  <p class="text-slate-400">Score da sessão</p>
+                  <p id="current-score" class="mt-1 text-lg font-semibold">—</p>
+                </div>
+                <div
+                  class="rounded-xl border border-slate-700/80 bg-slate-900/80 px-3 py-2"
+                >
+                  <p class="text-slate-400">Resultado</p>
+                  <p
+                    id="current-result"
+                    class="mt-1 text-xs text-slate-300"
+                  >
+                    Treine para ver o resultado.
+                  </p>
+                </div>
+              </div>
             </section>
 
             <!-- Chat card -->
@@ -619,8 +643,7 @@
                   class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <span class="text-[11px] text-slate-400">
-                    Dica: use contexto → ação → resultado. Isso deixa a resposta
-                    muito mais forte.
+                    Enter envia a resposta · Shift + Enter quebra linha.
                   </span>
                   <button
                     id="send-btn"

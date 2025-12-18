@@ -7,6 +7,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const startTrainingButtons = document.querySelectorAll("[data-start-training]");
   const backDashboardBtn = document.getElementById("back-dashboard");
 
+  // NAV lateral (precisa dos data-nav no HTML)
+  const navDashboardBtn = document.querySelector('[data-nav="dashboard"]');
+  const navTrainingBtn = document.querySelector('[data-nav="training"]');
+
   // Config painel
   const roleInput = document.getElementById("role-input");
   const levelSelect = document.getElementById("level-select");
@@ -39,11 +43,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const statAnswersEl = document.getElementById("stat-answers");
   const statFeedbacksEl = document.getElementById("stat-feedbacks");
 
+  // Score atual na sessão (opcional, se você criar no HTML)
+  const currentScoreEl = document.getElementById("current-score");
+  const currentResultEl = document.getElementById("current-result");
+
   // Stats do dashboard
   const totalSessionsEl = document.getElementById("total-sessions");
   const lastSessionDateEl = document.getElementById("last-session-date");
   const lastResultLabelEl = document.getElementById("last-result-label");
   const bestScoreLabelEl = document.getElementById("best-score-label");
+
+  // Charts (Chart.js)
+  let sessionsChart = null;
+  let skillsChart = null;
 
   let messages = [];
   let answersCount = 0;
@@ -77,6 +89,52 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateSessionStatsUI() {
     if (statAnswersEl) statAnswersEl.textContent = answersCount;
     if (statFeedbacksEl) statFeedbacksEl.textContent = feedbacksCount;
+  }
+
+  function updateScoreUI() {
+    if (currentScoreEl) {
+      if (stats.lastScore != null) {
+        currentScoreEl.textContent = stats.lastScore.toFixed(1) + " / 10";
+      } else {
+        currentScoreEl.textContent = "—";
+      }
+    }
+
+    if (currentResultEl) {
+      currentResultEl.classList.remove("text-emerald-300", "text-amber-300", "text-slate-400");
+      if (stats.lastResult) {
+        currentResultEl.textContent = stats.lastResult;
+        if (/aprovado/i.test(stats.lastResult)) {
+          currentResultEl.classList.add("text-emerald-300");
+        } else {
+          currentResultEl.classList.add("text-amber-300");
+        }
+      } else {
+        currentResultEl.textContent = "Treine para ver o resultado.";
+        currentResultEl.classList.add("text-slate-400");
+      }
+    }
+  }
+
+  function updateDashboardChartsFromStats() {
+    // sessionsChart: usa totalSessions como último ponto
+    if (sessionsChart && stats.totalSessions != null) {
+      const data = sessionsChart.data.datasets[0].data;
+      // Mantém algumas semanas de exemplo e usa totalSessions como último ponto
+      if (data.length >= 4) {
+        data[data.length - 1] = Math.max(1, stats.totalSessions);
+      }
+      sessionsChart.update("none");
+    }
+
+    // skillsChart: usa bestScore pra ajustar um pouco o gráfico
+    if (skillsChart && stats.bestScore != null) {
+      const base = Math.max(0, Math.min(10, stats.bestScore));
+      const comm = Math.max(base - 1, 0.5);
+      const posture = Math.max(base - 2, 0.5);
+      skillsChart.data.datasets[0].data = [base, comm, posture];
+      skillsChart.update("none");
+    }
   }
 
   function updateDashboardFromStats() {
@@ -130,6 +188,9 @@ document.addEventListener("DOMContentLoaded", () => {
         bestScoreLabelEl.textContent = "Melhor desempenho: —";
       }
     }
+
+    updateDashboardChartsFromStats();
+    updateScoreUI();
   }
 
   function loadStats() {
@@ -288,15 +349,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!sessionsCanvas || !skillsCanvas) return;
 
+    // Sessões por semana (dados de exemplo)
     const ctx1 = sessionsCanvas.getContext("2d");
-    new Chart(ctx1, {
+    sessionsChart = new Chart(ctx1, {
       type: "line",
       data: {
         labels: ["Semana 1", "Semana 2", "Semana 3", "Semana 4"],
         datasets: [
           {
             label: "Entrevistas concluídas",
-            data: [2, 4, 3, 6],
+            data: [1, 3, 2, 4], // começa como exemplo, última será atualizada com stats reais
             borderColor: "#34d399",
             backgroundColor: "rgba(52,211,153,0.15)",
             tension: 0.35,
@@ -331,8 +393,9 @@ document.addEventListener("DOMContentLoaded", () => {
       },
     });
 
+    // Força por área (dados de exemplo)
     const ctx2 = skillsCanvas.getContext("2d");
-    new Chart(ctx2, {
+    skillsChart = new Chart(ctx2, {
       type: "doughnut",
       data: {
         labels: ["Técnico", "Comunicação", "Postura"],
@@ -391,10 +454,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function handleAssistantReplyForStats(reply) {
-    if (sessionClosed) return;
-
     const { result, score } = parseResultFromReply(reply);
 
+    // Aqui só atualiza se realmente for um fechamento (quando tiver resultado ou nota)
     if (!result && score == null) return;
 
     stats.totalSessions += 1;
@@ -480,6 +542,7 @@ document.addEventListener("DOMContentLoaded", () => {
     sessionClosed = false;
     updateSessionStatsUI();
     renderMessages();
+    updateScoreUI();
 
     setStatus("Gerando primeira pergunta da entrevista…");
     addTypingMessage();
@@ -541,13 +604,36 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   backDashboardBtn?.addEventListener("click", () => {
+    // Só alterna telas, NÃO reseta sessão
     trainingScreen?.classList.add("hidden");
     dashboardScreen?.classList.remove("hidden");
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
+  // Navegação pela sidebar
+  navDashboardBtn?.addEventListener("click", () => {
+    trainingScreen?.classList.add("hidden");
+    dashboardScreen?.classList.remove("hidden");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  navTrainingBtn?.addEventListener("click", () => {
+    // Se já tiver sessão, só volta pro chat
+    if (messages.length > 0) {
+      dashboardScreen?.classList.add("hidden");
+      trainingScreen?.classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      // Senão, abre o modal pra configurar e iniciar
+      openModal();
+    }
+  });
+
   startBtn?.addEventListener("click", () => {
     startInterview("start");
+    // já garante que está na tela de treinamento
+    dashboardScreen?.classList.add("hidden");
+    trainingScreen?.classList.remove("hidden");
   });
 
   // ===== Enviar resposta =====
@@ -586,6 +672,20 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     } finally {
       endLoading();
+    }
+  });
+
+  // ENTER para enviar, SHIFT+ENTER para nova linha
+  answerInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (!isLoading && answerForm) {
+        answerForm.requestSubmit
+          ? answerForm.requestSubmit()
+          : answerForm.dispatchEvent(
+              new Event("submit", { cancelable: true, bubbles: true })
+            );
+      }
     }
   });
 
