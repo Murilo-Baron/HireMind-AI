@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const levelSelect = document.getElementById("level-select");
   const areaInput = document.getElementById("area-input");
   const styleSelect = document.getElementById("style-select");
+  const modeSelect = document.getElementById("mode-select");
   const startBtn = document.getElementById("start-btn");
 
   // Modal
@@ -21,6 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalLevel = document.getElementById("modal-level");
   const modalArea = document.getElementById("modal-area");
   const modalStyle = document.getElementById("modal-style");
+  const modalMode = document.getElementById("modal-mode");
   const modalStartBtn = document.getElementById("modal-start-btn");
   const modalCloseBtn = document.getElementById("modal-close-btn");
 
@@ -28,16 +30,33 @@ document.addEventListener("DOMContentLoaded", () => {
   const messagesContainer = document.getElementById("messages");
   const answerForm = document.getElementById("answer-form");
   const answerInput = document.getElementById("answer-input");
+  const sendBtn = document.getElementById("send-btn");
   const statusEl = document.getElementById("status");
 
-  // Stats
+  // Stats dentro da sessão
   const statAnswersEl = document.getElementById("stat-answers");
   const statFeedbacksEl = document.getElementById("stat-feedbacks");
+
+  // Stats do dashboard
+  const totalSessionsEl = document.getElementById("total-sessions");
+  const lastSessionDateEl = document.getElementById("last-session-date");
+  const lastResultLabelEl = document.getElementById("last-result-label");
+  const bestScoreLabelEl = document.getElementById("best-score-label");
 
   let messages = [];
   let answersCount = 0;
   let feedbacksCount = 0;
   let isLoading = false;
+  let sessionClosed = false;
+
+  // estatísticas persistidas
+  let stats = {
+    totalSessions: 0,
+    bestScore: null,
+    lastResult: null,
+    lastScore: null,
+    lastDate: null,
+  };
 
   // ===== Helpers UI =====
   function openModal() {
@@ -52,9 +71,83 @@ document.addEventListener("DOMContentLoaded", () => {
     if (statusEl) statusEl.textContent = text || "";
   }
 
-  function updateStats() {
+  function updateSessionStatsUI() {
     if (statAnswersEl) statAnswersEl.textContent = answersCount;
     if (statFeedbacksEl) statFeedbacksEl.textContent = feedbacksCount;
+  }
+
+  function updateDashboardFromStats() {
+    if (totalSessionsEl) {
+      totalSessionsEl.textContent = stats.totalSessions || 0;
+    }
+
+    if (lastSessionDateEl) {
+      if (stats.lastDate) {
+        const d = new Date(stats.lastDate);
+        const dateStr = d.toLocaleDateString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+        });
+        const timeStr = d.toLocaleTimeString("pt-BR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        lastSessionDateEl.textContent = `${dateStr} · ${timeStr}`;
+      } else {
+        lastSessionDateEl.textContent = "Nenhuma sessão ainda";
+      }
+    }
+
+    if (lastResultLabelEl) {
+      lastResultLabelEl.classList.remove(
+        "text-emerald-300",
+        "text-amber-300",
+        "text-slate-400"
+      );
+
+      if (!stats.lastResult) {
+        lastResultLabelEl.textContent =
+          "Treine uma entrevista para ver o resultado aqui.";
+        lastResultLabelEl.classList.add("text-slate-400");
+      } else {
+        lastResultLabelEl.textContent = stats.lastResult;
+        if (/aprovado/i.test(stats.lastResult)) {
+          lastResultLabelEl.classList.add("text-emerald-300");
+        } else {
+          lastResultLabelEl.classList.add("text-amber-300");
+        }
+      }
+    }
+
+    if (bestScoreLabelEl) {
+      if (stats.bestScore != null) {
+        bestScoreLabelEl.textContent =
+          "Melhor desempenho: " + stats.bestScore.toFixed(1) + " / 10";
+      } else {
+        bestScoreLabelEl.textContent = "Melhor desempenho: —";
+      }
+    }
+  }
+
+  function loadStats() {
+    try {
+      const raw = localStorage.getItem("hiremindStats");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        stats = { ...stats, ...parsed };
+      }
+    } catch (e) {
+      console.warn("Não foi possível ler stats do localStorage:", e);
+    }
+    updateDashboardFromStats();
+  }
+
+  function saveStats() {
+    try {
+      localStorage.setItem("hiremindStats", JSON.stringify(stats));
+    } catch (e) {
+      console.warn("Não foi possível salvar stats no localStorage:", e);
+    }
   }
 
   // Escapa HTML básico e aplica markdown simples (**bold** + quebras de linha)
@@ -151,6 +244,44 @@ document.addEventListener("DOMContentLoaded", () => {
     renderMessages();
   }
 
+  function beginLoading(context) {
+    isLoading = true;
+    if (sendBtn) {
+      sendBtn.disabled = true;
+      sendBtn.classList.add("opacity-60", "cursor-not-allowed");
+      if (context === "answer") sendBtn.textContent = "Gerando...";
+    }
+    if (startBtn) {
+      startBtn.disabled = true;
+      startBtn.classList.add("opacity-60", "cursor-not-allowed");
+      if (context === "start") startBtn.textContent = "Iniciando...";
+    }
+    if (modalStartBtn) {
+      modalStartBtn.disabled = true;
+      modalStartBtn.classList.add("opacity-60", "cursor-not-allowed");
+      if (context === "modal") modalStartBtn.textContent = "Iniciando...";
+    }
+  }
+
+  function endLoading() {
+    isLoading = false;
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.classList.remove("opacity-60", "cursor-not-allowed");
+      sendBtn.textContent = "Enviar resposta";
+    }
+    if (startBtn) {
+      startBtn.disabled = false;
+      startBtn.classList.remove("opacity-60", "cursor-not-allowed");
+      startBtn.textContent = "Começar entrevista";
+    }
+    if (modalStartBtn) {
+      modalStartBtn.disabled = false;
+      modalStartBtn.classList.remove("opacity-60", "cursor-not-allowed");
+      modalStartBtn.textContent = "Começar entrevista";
+    }
+  }
+
   // ===== Dashboard Charts (Chart.js) =====
   function initDashboardCharts() {
     if (typeof Chart === "undefined") return;
@@ -236,12 +367,64 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // ===== Parse de resultado da IA =====
+  function parseResultFromReply(reply) {
+    if (!reply) return { result: null, score: null };
+
+    const resultMatch = reply.match(/Resultado:\s*(.+)/i);
+    const result = resultMatch ? resultMatch[1].trim() : null;
+
+    const techMatch = reply.match(
+      /Conhecimento técnico:\s*(\d+)\s*de\s*10/i
+    );
+    const commMatch = reply.match(/Comunicação:\s*(\d+)\s*de\s*10/i);
+    const postMatch = reply.match(
+      /Postura profissional:\s*(\d+)\s*de\s*10/i
+    );
+
+    const parts = [];
+    if (techMatch) parts.push(parseInt(techMatch[1], 10));
+    if (commMatch) parts.push(parseInt(commMatch[1], 10));
+    if (postMatch) parts.push(parseInt(postMatch[1], 10));
+
+    const score =
+      parts.length > 0
+        ? parts.reduce((sum, v) => sum + v, 0) / parts.length
+        : null;
+
+    return { result, score };
+  }
+
+  function handleAssistantReplyForStats(reply) {
+    if (sessionClosed) return;
+
+    const { result, score } = parseResultFromReply(reply);
+
+    if (!result && score == null) return;
+
+    stats.totalSessions += 1;
+    if (score != null) {
+      stats.lastScore = score;
+      if (stats.bestScore == null || score > stats.bestScore) {
+        stats.bestScore = score;
+      }
+    }
+
+    stats.lastResult = result || "Sessão encerrada";
+    stats.lastDate = new Date().toISOString();
+    sessionClosed = true;
+
+    saveStats();
+    updateDashboardFromStats();
+  }
+
   // ===== Chamada à API =====
   async function callInterviewApi(history) {
     const role = roleInput?.value.trim() || "Desenvolvedor Jr";
     const level = levelSelect?.value || "junior";
     const area = areaInput?.value.trim() || "tecnologia";
     const style = styleSelect?.value || "equilibrado";
+    const mode = modeSelect?.value || "completo";
 
     // remove mensagens de "typing" e qualquer campo extra antes de enviar
     const sanitizedHistory = (history || [])
@@ -256,6 +439,7 @@ document.addEventListener("DOMContentLoaded", () => {
       level,
       area,
       style,
+      mode,
       messages: sanitizedHistory,
     };
 
@@ -275,14 +459,15 @@ document.addEventListener("DOMContentLoaded", () => {
     return data.reply || "Não consegui gerar uma resposta agora.";
   }
 
-  async function startInterview() {
+  async function startInterview(trigger = "start") {
     if (isLoading) return;
-    isLoading = true;
+    beginLoading(trigger);
 
     messages = [];
     answersCount = 0;
     feedbacksCount = 0;
-    updateStats();
+    sessionClosed = false;
+    updateSessionStatsUI();
     renderMessages();
 
     setStatus("Gerando primeira pergunta da entrevista…");
@@ -300,9 +485,11 @@ document.addEventListener("DOMContentLoaded", () => {
       removeTypingMessage();
       messages.push({ role: "assistant", content: reply });
       feedbacksCount += 1;
-      updateStats();
+      updateSessionStatsUI();
       renderMessages();
       setStatus("");
+
+      handleAssistantReplyForStats(reply);
     } catch (err) {
       console.error(err);
       removeTypingMessage();
@@ -310,7 +497,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "Erro ao falar com a IA. Verifique se o servidor está rodando e tente novamente."
       );
     } finally {
-      isLoading = false;
+      endLoading();
     }
   }
 
@@ -328,6 +515,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (modalLevel && levelSelect) levelSelect.value = modalLevel.value;
     if (modalArea && areaInput) areaInput.value = modalArea.value;
     if (modalStyle && styleSelect) styleSelect.value = modalStyle.value;
+    if (modalMode && modeSelect) modeSelect.value = modalMode.value;
 
     // Troca para a tela de treinamento
     dashboardScreen?.classList.add("hidden");
@@ -335,7 +523,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
 
     closeModal();
-    await startInterview();
+    await startInterview("modal");
   });
 
   backDashboardBtn?.addEventListener("click", () => {
@@ -345,7 +533,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   startBtn?.addEventListener("click", () => {
-    startInterview();
+    startInterview("start");
   });
 
   // ===== Enviar resposta =====
@@ -358,22 +546,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     messages.push({ role: "user", content: answer });
     answersCount += 1;
-    updateStats();
+    updateSessionStatsUI();
     renderMessages();
     if (answerInput) answerInput.value = "";
 
     setStatus("Analisando resposta e gerando próxima pergunta…");
     addTypingMessage();
-    isLoading = true;
+    beginLoading("answer");
 
     try {
       const reply = await callInterviewApi(messages);
       removeTypingMessage();
       messages.push({ role: "assistant", content: reply });
       feedbacksCount += 1;
-      updateStats();
+      updateSessionStatsUI();
       renderMessages();
       setStatus("");
+
+      handleAssistantReplyForStats(reply);
     } catch (err) {
       console.error(err);
       removeTypingMessage();
@@ -381,10 +571,11 @@ document.addEventListener("DOMContentLoaded", () => {
         "Erro ao falar com a IA. Verifique se o servidor está rodando e tente novamente."
       );
     } finally {
-      isLoading = false;
+      endLoading();
     }
   });
 
-  // inicia os gráficos do dashboard
+  // inicia os gráficos do dashboard e carrega stats salvos
   initDashboardCharts();
+  loadStats();
 });

@@ -21,7 +21,7 @@
 
     <style>
       body {
-        background: radial-gradient(circle at top, #1f2937, #020617 60%);
+        background: radial-gradient(circle at top, #111827, #020617 60%);
       }
       ::-webkit-scrollbar {
         width: 6px;
@@ -41,16 +41,17 @@
       <aside
         class="hidden sm:flex w-18 md:w-20 border-r border-slate-800 bg-black/95 flex-col items-center py-4 gap-4"
       >
-        <!-- Logo -->
+        <!-- Logo com imagem -->
         <div
-  class="w-11 h-11 rounded-2xl bg-slate-950/90 border border-slate-700 flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(15,23,42,0.7)] mb-2"
->
-  <img
-    src="./assets/logo.png"
-    alt="HireMind AI"
-    class="w-9 h-9 object-contain"
-  />
-</div>
+          class="w-11 h-11 rounded-2xl bg-slate-950/90 border border-slate-700 flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(15,23,42,0.7)] mb-2"
+        >
+          <img
+            src="./assets/logo.png"
+            alt="HireMind AI"
+            class="w-9 h-9 object-contain"
+          />
+        </div>
+
         <!-- Dashboard -->
         <button
           class="group w-9 h-9 rounded-full bg-slate-950/80 border border-slate-700 flex items-center justify-center hover:border-emerald-400/80 hover:bg-emerald-400/10 transition"
@@ -151,15 +152,19 @@
           >
             <div class="flex items-center gap-3">
               <div
-                class="sm:hidden w-9 h-9 rounded-2xl bg-gradient-to-br from-emerald-400 via-emerald-300 to-sky-400 flex items-center justify-center font-black text-slate-900 shadow-lg shadow-emerald-500/40"
+                class="sm:hidden w-9 h-9 rounded-2xl bg-slate-950/90 border border-slate-700 flex items-center justify-center overflow-hidden shadow-md shadow-black/60"
               >
-                HM
+                <img
+                  src="./assets/logo-hiremind.svg"
+                  alt="HireMind AI"
+                  class="w-8 h-8 object-contain"
+                />
               </div>
               <div>
                 <h1
                   class="text-sm md:text-base tracking-[0.18em] uppercase text-slate-100 font-semibold"
                 >
-                  HireMind AI
+                  HIREMIND AI
                 </h1>
                 <p class="text-xs text-slate-400">
                   Treine entrevistas técnicas e comportamentais com IA.
@@ -176,7 +181,7 @@
               </button>
               <button
                 data-start-training
-                class="px-4 py-1.5 rounded-full text-[11px] font-semibold bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/40 hover:bg-emerald-300 transition"
+                class="px-4 py-1.5 rounded-full text-[11px] font-semibold bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/40 hover:bg-emerald-300 transition active:scale-95"
                 type="button"
               >
                 Iniciar treinamento
@@ -192,15 +197,14 @@
               <p
                 class="text-[11px] uppercase tracking-[0.16em] text-slate-400 mb-1"
               >
-                Visão geral (mock)
+                Visão geral (mock + dados locais)
               </p>
               <h2 class="text-base md:text-lg font-semibold text-slate-50">
                 Seu painel de treino de entrevistas
               </h2>
               <p class="text-xs text-slate-400 mt-1 max-w-xl">
-                Esses números são apenas um exemplo de como suas sessões reais
-                podem ser acompanhadas: frequência, tipo de pergunta e
-                recomendações da IA.
+                Esses números começam como exemplo e vão sendo atualizados com
+                suas sessões reais: frequência, resultado e notas médias.
               </p>
             </div>
             <div
@@ -208,7 +212,15 @@
             >
               <div class="text-right">
                 <p class="text-slate-400">Último treino</p>
-                <p class="font-semibold">Ontem · 23 min</p>
+                <p id="last-session-date" class="font-semibold">
+                  Nenhuma sessão ainda
+                </p>
+                <p
+                  id="last-result-label"
+                  class="text-[11px] mt-0.5 text-slate-400"
+                >
+                  Treine uma entrevista para ver o resultado aqui.
+                </p>
               </div>
               <div
                 class="w-9 h-9 rounded-full bg-emerald-400/15 border border-emerald-400/70 flex items-center justify-center text-emerald-200 text-xs"
@@ -231,12 +243,12 @@
                   Sessões concluídas
                 </h3>
                 <span
-                  class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-400/50"
-                  >Mock</span
+                  class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/10 text-emerald-300 border border-emerald-400/40"
+                  >Atualizado</span
                 >
               </div>
               <div class="flex items-end gap-2">
-                <span class="text-2xl font-semibold">18</span>
+                <span id="total-sessions" class="text-2xl font-semibold">18</span>
                 <span class="text-[11px] text-slate-400 mb-1"
                   >entrevistas praticadas</span
                 >
@@ -279,6 +291,10 @@
                 >
                   Foco das perguntas
                 </h3>
+                <span
+                  class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900/80 text-slate-400 border border-slate-600/70"
+                  >Mock</span
+                >
               </div>
 
               <div class="flex items-center gap-4">
@@ -332,6 +348,9 @@
                   </p>
                 </div>
               </div>
+              <p id="best-score-label" class="text-[11px] text-slate-400">
+                Melhor desempenho: — 
+              </p>
             </article>
 
             <!-- Card 3 -->
@@ -356,7 +375,7 @@
               </ul>
               <button
                 data-start-training
-                class="mt-2 self-start px-3 py-1.5 rounded-full text-[11px] font-semibold bg-emerald-400 text-slate-900 shadow-md shadow-emerald-500/40 hover:bg-emerald-300 transition"
+                class="mt-2 self-start px-3 py-1.5 rounded-full text-[11px] font-semibold bg-emerald-400 text-slate-900 shadow-md shadow-emerald-500/40 hover:bg-emerald-300 transition active:scale-95"
               >
                 Começar agora
               </button>
@@ -499,12 +518,28 @@
                     </option>
                   </select>
                 </label>
+
+                <label class="block text-xs space-y-1">
+                  <span class="text-slate-300">Modo de treino</span>
+                  <select
+                    id="mode-select"
+                    class="w-full rounded-full border border-slate-600/70 bg-slate-900/80 px-3 py-2 text-xs text-slate-50 outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400"
+                  >
+                    <option value="completo">Entrevista completa</option>
+                    <option value="tecnico">
+                      Só perguntas técnicas
+                    </option>
+                    <option value="comportamental">
+                      Só perguntas comportamentais
+                    </option>
+                  </select>
+                </label>
               </div>
 
               <button
                 id="start-btn"
                 type="button"
-                class="mt-2 w-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 text-xs font-semibold py-2 shadow-lg shadow-emerald-500/40 hover:from-emerald-300 hover:to-emerald-400 transition"
+                class="mt-2 w-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 text-xs font-semibold py-2 shadow-lg shadow-emerald-500/40 hover:from-emerald-300 hover:to-emerald-400 transition active:scale-95"
               >
                 Começar entrevista
               </button>
@@ -578,8 +613,9 @@
                     muito mais forte.
                   </span>
                   <button
+                    id="send-btn"
                     type="submit"
-                    class="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 text-xs font-semibold px-4 py-2 shadow-md shadow-emerald-500/40 hover:from-emerald-300 hover:to-emerald-400 transition"
+                    class="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 text-xs font-semibold px-4 py-2 shadow-md shadow-emerald-500/40 hover:from-emerald-300 hover:to-emerald-400 transition active:scale-95"
                   >
                     Enviar resposta
                   </button>
@@ -677,7 +713,23 @@
                 Equilibrado (técnico + comportamental)
               </option>
               <option value="tecnico">Mais técnico</option>
-              <option value="comportamental">Mais comportamental</option>
+              <option value="comportamental">
+                Mais comportamental
+              </option>
+            </select>
+          </label>
+
+          <label class="block space-y-1">
+            <span class="text-slate-300">Modo de treino</span>
+            <select
+              id="modal-mode"
+              class="w-full rounded-full border border-slate-600/70 bg-slate-900/80 px-3 py-2 text-xs text-slate-50 outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400"
+            >
+              <option value="completo">Entrevista completa</option>
+              <option value="tecnico">Só perguntas técnicas</option>
+              <option value="comportamental">
+                Só perguntas comportamentais
+              </option>
             </select>
           </label>
 
@@ -690,7 +742,7 @@
           <button
             id="modal-start-btn"
             type="button"
-            class="rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 text-xs font-semibold px-4 py-2 shadow-lg shadow-emerald-500/40 hover:from-emerald-300 hover:to-emerald-400 transition"
+            class="rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 text-xs font-semibold px-4 py-2 shadow-lg shadow-emerald-500/40 hover:from-emerald-300 hover:to-emerald-400 transition active:scale-95"
           >
             Começar entrevista
           </button>
