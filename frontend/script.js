@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const areaInput = document.getElementById("area-input");
   const styleSelect = document.getElementById("style-select");
   const modeSelect = document.getElementById("mode-select");
+  const nameInput = document.getElementById("name-input");
   const startBtn = document.getElementById("start-btn");
 
   // Modal
@@ -23,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalArea = document.getElementById("modal-area");
   const modalStyle = document.getElementById("modal-style");
   const modalMode = document.getElementById("modal-mode");
+  const modalName = document.getElementById("modal-name");
   const modalStartBtn = document.getElementById("modal-start-btn");
   const modalCloseBtn = document.getElementById("modal-close-btn");
 
@@ -48,6 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let feedbacksCount = 0;
   let isLoading = false;
   let sessionClosed = false;
+  let candidateName = "";
 
   // estatísticas persistidas
   let stats = {
@@ -150,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Escapa HTML básico e aplica markdown simples (**bold** + quebras de linha)
+  // Escapa HTML básico e só coloca <br> nas quebras de linha
   function renderMarkdown(text) {
     if (!text) return "";
     let safe = text
@@ -158,13 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
 
-    // **negrito**
-    safe = safe.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-
-    // Quebra de linha
-    safe = safe.replace(/\n/g, "<br/>");
-
-    return safe;
+    return safe.replace(/\n/g, "<br/>");
   }
 
   function renderMessages() {
@@ -291,7 +288,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!sessionsCanvas || !skillsCanvas) return;
 
-    // Mock: sessões por semana
     const ctx1 = sessionsCanvas.getContext("2d");
     new Chart(ctx1, {
       type: "line",
@@ -335,7 +331,6 @@ document.addEventListener("DOMContentLoaded", () => {
       },
     });
 
-    // Mock: força por área (0 a 10)
     const ctx2 = skillsCanvas.getContext("2d");
     new Chart(ctx2, {
       type: "doughnut",
@@ -425,8 +420,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const area = areaInput?.value.trim() || "tecnologia";
     const style = styleSelect?.value || "equilibrado";
     const mode = modeSelect?.value || "completo";
+    const name = candidateName || (nameInput?.value.trim() || "candidato");
 
-    // remove mensagens de "typing" e qualquer campo extra antes de enviar
     const sanitizedHistory = (history || [])
       .filter((m) => !m.typing)
       .map((m) => ({
@@ -440,6 +435,7 @@ document.addEventListener("DOMContentLoaded", () => {
       area,
       style,
       mode,
+      candidateName: name,
       messages: sanitizedHistory,
     };
 
@@ -456,12 +452,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const data = await res.json();
-    return data.reply || "Não consegui gerar uma resposta agora.";
+    let reply = data.reply || "Não consegui gerar uma resposta agora.";
+
+    // LIMPEZA de markdown e caracteres indesejados
+    reply = reply.replace(/\*\*(.+?)\*\*/g, "$1"); // **negrito**
+    reply = reply.replace(/\*/g, "");             // asteriscos soltos
+    reply = reply.replace(/["“”]/g, "");          // aspas duplas
+    reply = reply.replace(/\s{2,}/g, " ").trim(); // espaços duplos
+
+    return reply;
   }
 
   async function startInterview(trigger = "start") {
     if (isLoading) return;
     beginLoading(trigger);
+
+    // captura nome atual
+    candidateName =
+      nameInput?.value.trim() ||
+      modalName?.value.trim() ||
+      candidateName ||
+      "candidato";
 
     messages = [];
     answersCount = 0;
@@ -474,11 +485,12 @@ document.addEventListener("DOMContentLoaded", () => {
     addTypingMessage();
 
     try {
+      const firstUserMessage = `Quero iniciar uma entrevista para essa vaga. Meu nome é ${candidateName}. Faça a primeira pergunta e, sempre que falar comigo, me chame de ${candidateName}.`;
+
       const reply = await callInterviewApi([
         {
           role: "user",
-          content:
-            "Quero iniciar uma entrevista para essa vaga. Faça a primeira pergunta.",
+          content: firstUserMessage,
         },
       ]);
 
@@ -510,14 +522,16 @@ document.addEventListener("DOMContentLoaded", () => {
   configBackdrop?.addEventListener("click", () => closeModal());
 
   modalStartBtn?.addEventListener("click", async () => {
-    // Copia dados do modal para o painel
+    // Copia dados do modal para o painel, inclusive nome
     if (modalRole && roleInput) roleInput.value = modalRole.value;
     if (modalLevel && levelSelect) levelSelect.value = modalLevel.value;
     if (modalArea && areaInput) areaInput.value = modalArea.value;
     if (modalStyle && styleSelect) styleSelect.value = modalStyle.value;
     if (modalMode && modeSelect) modeSelect.value = modalMode.value;
+    if (modalName && nameInput) nameInput.value = modalName.value;
 
-    // Troca para a tela de treinamento
+    candidateName = modalName?.value.trim() || candidateName || "candidato";
+
     dashboardScreen?.classList.add("hidden");
     trainingScreen?.classList.remove("hidden");
     window.scrollTo({ top: 0, behavior: "smooth" });

@@ -41,7 +41,7 @@
       <aside
         class="hidden sm:flex w-18 md:w-20 border-r border-slate-800 bg-black/95 flex-col items-center py-4 gap-4"
       >
-        <!-- Logo com imagem -->
+        <!-- Logo com imagem (ajuste o caminho do src) -->
         <div
           class="w-11 h-11 rounded-2xl bg-slate-950/90 border border-slate-700 flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(15,23,42,0.7)] mb-2"
         >
@@ -349,7 +349,7 @@
                 </div>
               </div>
               <p id="best-score-label" class="text-[11px] text-slate-400">
-                Melhor desempenho: — 
+                Melhor desempenho: —
               </p>
             </article>
 
@@ -469,6 +469,16 @@
               </div>
 
               <div class="space-y-3">
+                <label class="block text-xs space-y-1">
+                  <span class="text-slate-300">Seu nome</span>
+                  <input
+                    id="name-input"
+                    type="text"
+                    placeholder="Ex.: Murilo"
+                    class="w-full rounded-full border border-slate-600/70 bg-slate-900/80 px-3 py-2 text-xs text-slate-50 placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400"
+                  />
+                </label>
+
                 <label class="block text-xs space-y-1">
                   <span class="text-slate-300">Cargo desejado</span>
                   <input
@@ -669,6 +679,16 @@
         </div>
 
         <div class="space-y-3 text-xs">
+          <label class="block space-y-1">
+            <span class="text-slate-300">Seu nome</span>
+            <input
+              id="modal-name"
+              type="text"
+              placeholder="Ex.: Murilo"
+              class="w-full rounded-full border border-slate-600/70 bg-slate-900/80 px-3 py-2 text-xs text-slate-50 placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400"
+            />
+          </label>
+
           <label class="block space-y-1">
             <span class="text-slate-300">Cargo desejado</span>
             <input
