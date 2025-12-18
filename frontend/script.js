@@ -7,14 +7,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const startTrainingButtons = document.querySelectorAll("[data-start-training]");
   const backDashboardBtn = document.getElementById("back-dashboard");
 
-  // Config painel (sessão)
+  // Config painel
   const roleInput = document.getElementById("role-input");
   const levelSelect = document.getElementById("level-select");
   const areaInput = document.getElementById("area-input");
   const styleSelect = document.getElementById("style-select");
   const startBtn = document.getElementById("start-btn");
 
-  // Modal de configuração inicial
+  // Modal
   const configModal = document.getElementById("config-modal");
   const configBackdrop = document.getElementById("config-backdrop");
   const modalRole = document.getElementById("modal-role");
@@ -34,18 +34,44 @@ document.addEventListener("DOMContentLoaded", () => {
   const statAnswersEl = document.getElementById("stat-answers");
   const statFeedbacksEl = document.getElementById("stat-feedbacks");
 
-  // Estado
   let messages = [];
   let answersCount = 0;
   let feedbacksCount = 0;
+  let isLoading = false;
 
-  // ========= Helpers =========
+  // ===== Helpers UI =====
   function openModal() {
-    if (configModal) configModal.classList.remove("hidden");
+    configModal?.classList.remove("hidden");
   }
 
   function closeModal() {
-    if (configModal) configModal.classList.add("hidden");
+    configModal?.classList.add("hidden");
+  }
+
+  function setStatus(text) {
+    if (statusEl) statusEl.textContent = text || "";
+  }
+
+  function updateStats() {
+    if (statAnswersEl) statAnswersEl.textContent = answersCount;
+    if (statFeedbacksEl) statFeedbacksEl.textContent = feedbacksCount;
+  }
+
+  // Escapa HTML básico e aplica markdown simples (**bold** + quebras de linha)
+  function renderMarkdown(text) {
+    if (!text) return "";
+    let safe = text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    // **negrito**
+    safe = safe.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+
+    // Quebra de linha
+    safe = safe.replace(/\n/g, "<br/>");
+
+    return safe;
   }
 
   function renderMessages() {
@@ -59,8 +85,11 @@ document.addEventListener("DOMContentLoaded", () => {
         "rounded-2xl",
         "px-3",
         "py-2",
+        "leading-relaxed",
         "text-[13px]",
-        "leading-relaxed"
+        "flex",
+        "flex-col",
+        "gap-1"
       );
 
       const label = document.createElement("div");
@@ -68,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "text-[10px]",
         "uppercase",
         "tracking-[0.16em]",
-        "mb-1"
+        "mb-0.5"
       );
 
       if (msg.role === "user") {
@@ -92,7 +121,17 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const content = document.createElement("div");
-      content.textContent = msg.content;
+
+      if (msg.typing) {
+        content.innerHTML =
+          '<span class="inline-flex gap-1">' +
+          '<span class="w-1.5 h-1.5 rounded-full bg-slate-400 animate-pulse"></span>' +
+          '<span class="w-1.5 h-1.5 rounded-full bg-slate-500 animate-pulse"></span>' +
+          '<span class="w-1.5 h-1.5 rounded-full bg-slate-600 animate-pulse"></span>' +
+          "</span>";
+      } else {
+        content.innerHTML = renderMarkdown(msg.content);
+      }
 
       wrapper.appendChild(label);
       wrapper.appendChild(content);
@@ -102,22 +141,123 @@ document.addEventListener("DOMContentLoaded", () => {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
 
-  function setStatus(text) {
-    if (statusEl) statusEl.textContent = text || "";
+  function addTypingMessage() {
+    messages.push({ role: "assistant", content: "", typing: true });
+    renderMessages();
   }
 
-  function updateStats() {
-    if (statAnswersEl) statAnswersEl.textContent = answersCount;
-    if (statFeedbacksEl) statFeedbacksEl.textContent = feedbacksCount;
+  function removeTypingMessage() {
+    messages = messages.filter((m) => !m.typing);
+    renderMessages();
   }
 
+  // ===== Dashboard Charts (Chart.js) =====
+  function initDashboardCharts() {
+    if (typeof Chart === "undefined") return;
+
+    const sessionsCanvas = document.getElementById("sessionsChart");
+    const skillsCanvas = document.getElementById("skillsChart");
+
+    if (!sessionsCanvas || !skillsCanvas) return;
+
+    // Mock: sessões por semana
+    const ctx1 = sessionsCanvas.getContext("2d");
+    new Chart(ctx1, {
+      type: "line",
+      data: {
+        labels: ["Semana 1", "Semana 2", "Semana 3", "Semana 4"],
+        datasets: [
+          {
+            label: "Entrevistas concluídas",
+            data: [2, 4, 3, 6],
+            borderColor: "#34d399",
+            backgroundColor: "rgba(52,211,153,0.15)",
+            tension: 0.35,
+            fill: true,
+            pointRadius: 3,
+            pointBackgroundColor: "#22c55e",
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: {
+              color: "#e5e7eb",
+              font: { size: 11 },
+            },
+          },
+        },
+        scales: {
+          x: {
+            ticks: { color: "#9ca3af", font: { size: 10 } },
+            grid: { color: "rgba(55,65,81,0.4)" },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: { color: "#9ca3af", font: { size: 10 }, stepSize: 1 },
+            grid: { color: "rgba(31,41,55,0.6)" },
+          },
+        },
+      },
+    });
+
+    // Mock: força por área (0 a 10)
+    const ctx2 = skillsCanvas.getContext("2d");
+    new Chart(ctx2, {
+      type: "doughnut",
+      data: {
+        labels: ["Técnico", "Comunicação", "Postura"],
+        datasets: [
+          {
+            data: [7, 8, 9],
+            backgroundColor: ["#38bdf8", "#34d399", "#f97316"],
+            borderColor: "#020617",
+            borderWidth: 2,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: {
+              color: "#e5e7eb",
+              font: { size: 10 },
+            },
+          },
+        },
+        cutout: "60%",
+      },
+    });
+  }
+
+  // ===== Chamada à API =====
   async function callInterviewApi(history) {
     const role = roleInput?.value.trim() || "Desenvolvedor Jr";
     const level = levelSelect?.value || "junior";
     const area = areaInput?.value.trim() || "tecnologia";
     const style = styleSelect?.value || "equilibrado";
 
-    const payload = { role, level, area, style, messages: history };
+    // remove mensagens de "typing" e qualquer campo extra antes de enviar
+    const sanitizedHistory = (history || [])
+      .filter((m) => !m.typing)
+      .map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+    const payload = {
+      role,
+      level,
+      area,
+      style,
+      messages: sanitizedHistory,
+    };
 
     const res = await fetch(API_URL, {
       method: "POST",
@@ -126,7 +266,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     if (!res.ok) {
-      throw new Error("Erro ao falar com a API");
+      const errorData = await res.json().catch(() => ({}));
+      console.error("Erro da API:", errorData);
+      throw new Error(errorData.error || "Erro na API");
     }
 
     const data = await res.json();
@@ -134,12 +276,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function startInterview() {
+    if (isLoading) return;
+    isLoading = true;
+
     messages = [];
     answersCount = 0;
     feedbacksCount = 0;
     updateStats();
     renderMessages();
-    setStatus("Gerando primeira pergunta da entrevista...");
+
+    setStatus("Gerando primeira pergunta da entrevista…");
+    addTypingMessage();
 
     try {
       const reply = await callInterviewApi([
@@ -150,6 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
         },
       ]);
 
+      removeTypingMessage();
       messages.push({ role: "assistant", content: reply });
       feedbacksCount += 1;
       updateStats();
@@ -157,93 +305,86 @@ document.addEventListener("DOMContentLoaded", () => {
       setStatus("");
     } catch (err) {
       console.error(err);
+      removeTypingMessage();
       setStatus(
         "Erro ao falar com a IA. Verifique se o servidor está rodando e tente novamente."
       );
+    } finally {
+      isLoading = false;
     }
   }
 
-  // ========= Navegação e modal =========
+  // ===== Navegação / Modal =====
+  startTrainingButtons.forEach((btn) =>
+    btn.addEventListener("click", () => openModal())
+  );
 
-  // Abrir modal ao clicar em "Iniciar treinamento" no dashboard
-  if (startTrainingButtons.length > 0) {
-    startTrainingButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        openModal();
-      });
-    });
-  }
+  modalCloseBtn?.addEventListener("click", () => closeModal());
+  configBackdrop?.addEventListener("click", () => closeModal());
 
-  // Fechar modal (botão X ou clicar no backdrop)
-  if (modalCloseBtn) {
-    modalCloseBtn.addEventListener("click", closeModal);
-  }
-  if (configBackdrop) {
-    configBackdrop.addEventListener("click", closeModal);
-  }
+  modalStartBtn?.addEventListener("click", async () => {
+    // Copia dados do modal para o painel
+    if (modalRole && roleInput) roleInput.value = modalRole.value;
+    if (modalLevel && levelSelect) levelSelect.value = modalLevel.value;
+    if (modalArea && areaInput) areaInput.value = modalArea.value;
+    if (modalStyle && styleSelect) styleSelect.value = modalStyle.value;
 
-  // Botão do modal -> copia configs, troca tela e inicia entrevista
-  if (modalStartBtn) {
-    modalStartBtn.addEventListener("click", async () => {
-      // copiar valores do modal para o painel lateral
-      if (modalRole && roleInput) roleInput.value = modalRole.value;
-      if (modalLevel && levelSelect) levelSelect.value = modalLevel.value;
-      if (modalArea && areaInput) areaInput.value = modalArea.value;
-      if (modalStyle && styleSelect) styleSelect.value = modalStyle.value;
+    // Troca para a tela de treinamento
+    dashboardScreen?.classList.add("hidden");
+    trainingScreen?.classList.remove("hidden");
+    window.scrollTo({ top: 0, behavior: "smooth" });
 
-      // trocar tela
-      if (dashboardScreen) dashboardScreen.classList.add("hidden");
-      if (trainingScreen) trainingScreen.classList.remove("hidden");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    closeModal();
+    await startInterview();
+  });
 
-      closeModal();
-      await startInterview();
-    });
-  }
+  backDashboardBtn?.addEventListener("click", () => {
+    trainingScreen?.classList.add("hidden");
+    dashboardScreen?.classList.remove("hidden");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
 
-  // botão "voltar para dashboard"
-  if (backDashboardBtn) {
-    backDashboardBtn.addEventListener("click", () => {
-      if (trainingScreen) trainingScreen.classList.add("hidden");
-      if (dashboardScreen) dashboardScreen.classList.remove("hidden");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  }
+  startBtn?.addEventListener("click", () => {
+    startInterview();
+  });
 
-  // botão "Começar entrevista" dentro do painel lateral
-  if (startBtn) {
-    startBtn.addEventListener("click", () => {
-      startInterview();
-    });
-  }
+  // ===== Enviar resposta =====
+  answerForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (isLoading) return;
 
-  // ========= Enviar resposta =========
-  if (answerForm) {
-    answerForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const answer = answerInput?.value.trim();
-      if (!answer) return;
+    const answer = answerInput?.value.trim();
+    if (!answer) return;
 
-      messages.push({ role: "user", content: answer });
-      answersCount += 1;
+    messages.push({ role: "user", content: answer });
+    answersCount += 1;
+    updateStats();
+    renderMessages();
+    if (answerInput) answerInput.value = "";
+
+    setStatus("Analisando resposta e gerando próxima pergunta…");
+    addTypingMessage();
+    isLoading = true;
+
+    try {
+      const reply = await callInterviewApi(messages);
+      removeTypingMessage();
+      messages.push({ role: "assistant", content: reply });
+      feedbacksCount += 1;
       updateStats();
       renderMessages();
-      if (answerInput) answerInput.value = "";
-      setStatus("Analisando resposta e gerando próxima pergunta...");
+      setStatus("");
+    } catch (err) {
+      console.error(err);
+      removeTypingMessage();
+      setStatus(
+        "Erro ao falar com a IA. Verifique se o servidor está rodando e tente novamente."
+      );
+    } finally {
+      isLoading = false;
+    }
+  });
 
-      try {
-        const reply = await callInterviewApi(messages);
-        messages.push({ role: "assistant", content: reply });
-        feedbacksCount += 1;
-        updateStats();
-        renderMessages();
-        setStatus("");
-      } catch (err) {
-        console.error(err);
-        setStatus(
-          "Erro ao falar com a IA. Verifique se o servidor está rodando e tente novamente."
-        );
-      }
-    });
-  }
+  // inicia os gráficos do dashboard
+  initDashboardCharts();
 });

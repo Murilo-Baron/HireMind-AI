@@ -2,10 +2,10 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <title>HireMind AI · Entrevistador</title>
+    <title>HireMind AI · Treino de Entrevistas</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Tailwind CDN -->
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -21,7 +21,7 @@
 
     <style>
       body {
-        background: radial-gradient(circle at top, #111827, #020617 60%);
+        background: radial-gradient(circle at top, #1f2937, #020617 60%);
       }
       ::-webkit-scrollbar {
         width: 6px;
@@ -31,56 +31,116 @@
         border-radius: 999px;
       }
     </style>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body class="min-h-screen text-slate-50">
     <div class="min-h-screen flex">
-      <!-- ===================================== -->
-      <!-- NAVBAR LATERAL ESQUERDA              -->
-      <!-- ===================================== -->
+      <!-- NAVBAR ESQUERDA -->
       <aside
-        class="w-16 md:w-20 border-r border-slate-800 bg-black/90 flex flex-col items-center py-4 gap-3"
+        class="hidden sm:flex w-18 md:w-20 border-r border-slate-800 bg-black/95 flex-col items-center py-4 gap-4"
       >
+        <!-- Logo -->
         <div
-          class="w-10 h-10 rounded-full bg-gradient-to-br from-white via-emerald-300 to-emerald-500 flex items-center justify-center font-black text-slate-900 mb-2"
-        >
-          H
-        </div>
-
+  class="w-11 h-11 rounded-2xl bg-slate-950/90 border border-slate-700 flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(15,23,42,0.7)] mb-2"
+>
+  <img
+    src="./assets/logo.png"
+    alt="HireMind AI"
+    class="w-9 h-9 object-contain"
+  />
+</div>
+        <!-- Dashboard -->
         <button
-          class="w-9 h-9 rounded-full bg-slate-900/90 border border-slate-700 flex items-center justify-center text-lg"
+          class="group w-9 h-9 rounded-full bg-slate-950/80 border border-slate-700 flex items-center justify-center hover:border-emerald-400/80 hover:bg-emerald-400/10 transition"
           title="Dashboard"
         >
-          📊
+          <svg
+            class="w-4 h-4 text-slate-400 group-hover:text-emerald-300 transition"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M4 19h16" />
+            <rect x="6" y="11" width="2.5" height="6" rx="1" />
+            <rect x="10.75" y="8" width="2.5" height="9" rx="1" />
+            <rect x="15.5" y="5" width="2.5" height="12" rx="1" />
+          </svg>
         </button>
+
+        <!-- Treinamento -->
         <button
-          class="w-9 h-9 rounded-full bg-slate-900/90 border border-slate-700 flex items-center justify-center text-lg"
+          class="group w-9 h-9 rounded-full bg-slate-950/80 border border-slate-700 flex items-center justify-center hover:border-emerald-400/80 hover:bg-emerald-400/10 transition"
           title="Treinamento"
         >
-          💬
+          <svg
+            class="w-4 h-4 text-slate-400 group-hover:text-emerald-300 transition"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M6 19l-1.5 2.5c-.4.7.2 1.5 1 1.3L9 22h6a6 6 0 006-6v-3a6 6 0 00-6-6H9a6 6 0 00-6 6v3a6 6 0 003 5.2"
+            />
+          </svg>
         </button>
+
+        <!-- Histórico -->
         <button
-          class="w-9 h-9 rounded-full bg-slate-900/90 border border-slate-700 flex items-center justify-center text-lg"
+          class="group w-9 h-9 rounded-full bg-slate-950/80 border border-slate-700 flex items-center justify-center hover:border-emerald-400/80 hover:bg-emerald-400/10 transition"
           title="Histórico"
         >
-          📁
+          <svg
+            class="w-4 h-4 text-slate-400 group-hover:text-emerald-300 transition"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M3 8.5A2.5 2.5 0 015.5 6h3l1.5 2h8A2.5 2.5 0 0120.5 10v6.5A2.5 2.5 0 0118 19H6a3 3 0 01-3-3V8.5z"
+            />
+          </svg>
         </button>
+
+        <!-- Config -->
         <button
-          class="w-9 h-9 rounded-full bg-slate-900/90 border border-slate-700 flex items-center justify-center text-lg"
+          class="group w-9 h-9 rounded-full bg-slate-950/80 border border-slate-700 flex items-center justify-center hover:border-emerald-400/80 hover:bg-emerald-400/10 transition"
           title="Configurações"
         >
-          ⚙️
+          <svg
+            class="w-4 h-4 text-slate-400 group-hover:text-emerald-300 transition"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="3.2" />
+            <path
+              d="M19 12a7 7 0 00-.15-1.5l1.92-1.46-1.6-2.77-2.27.64A6.9 6.9 0 0014 5.1L13.6 3h-3.2L10 5.1A6.9 6.9 0 007.1 6.9l-2.27-.64-1.6 2.77L5.15 10.5A7 7 0 005 12c0 .52.05 1.03.15 1.5L3.23 15l1.6 2.77 2.27-.64A6.9 6.9 0 0010 18.9L10.4 21h3.2l.4-2.1a6.9 6.9 0 002.9-1.8l2.27.64 1.6-2.77-1.92-1.5c.1-.47.15-.98.15-1.5z"
+            />
+          </svg>
         </button>
 
         <div class="mt-auto text-[10px] text-slate-500 text-center px-1">
-          v0.1 · mock demo
+          HireMind · v0.1
         </div>
       </aside>
 
-      <!-- ===================================== -->
-      <!-- MAIN AREA (Dashboard + Training)     -->
-      <!-- ===================================== -->
+      <!-- MAIN -->
       <div class="flex-1 flex flex-col">
-        <!-- ========== DASHBOARD ========== -->
+        <!-- DASHBOARD -->
         <div
           id="dashboard-screen"
           class="max-w-6xl mx-auto px-4 py-6 space-y-6"
@@ -91,18 +151,18 @@
           >
             <div class="flex items-center gap-3">
               <div
-                class="w-11 h-11 rounded-full bg-gradient-to-br from-white via-emerald-300 to-emerald-500 flex items-center justify-center font-black text-slate-900"
+                class="sm:hidden w-9 h-9 rounded-2xl bg-gradient-to-br from-emerald-400 via-emerald-300 to-sky-400 flex items-center justify-center font-black text-slate-900 shadow-lg shadow-emerald-500/40"
               >
-                H
+                HM
               </div>
               <div>
                 <h1
-                  class="text-sm tracking-[0.18em] uppercase text-slate-200 font-semibold"
+                  class="text-sm md:text-base tracking-[0.18em] uppercase text-slate-100 font-semibold"
                 >
                   HireMind AI
                 </h1>
                 <p class="text-xs text-slate-400">
-                  Dashboard de treino de entrevistas com LLaMA 3
+                  Treine entrevistas técnicas e comportamentais com IA.
                 </p>
               </div>
             </div>
@@ -112,17 +172,11 @@
                 class="px-3 py-1.5 rounded-full text-[11px] border border-slate-700/80 bg-slate-900/80 text-slate-300"
                 type="button"
               >
-                Modo <span class="font-semibold">Mock Interview</span>
-              </button>
-              <button
-                class="px-3 py-1.5 rounded-full text-[11px] border border-slate-700/80 bg-slate-900/80 text-slate-300"
-                type="button"
-              >
                 Perfil <span class="font-semibold">Dev Jr</span>
               </button>
               <button
                 data-start-training
-                class="px-4 py-1.5 rounded-full text-[11px] font-semibold bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/40"
+                class="px-4 py-1.5 rounded-full text-[11px] font-semibold bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/40 hover:bg-emerald-300 transition"
                 type="button"
               >
                 Iniciar treinamento
@@ -132,43 +186,43 @@
 
           <!-- Intro -->
           <section
-            class="rounded-2xl border border-slate-700/80 bg-slate-950/70 px-5 py-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between"
+            class="rounded-2xl border border-slate-700/80 bg-slate-950/70 px-5 py-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between shadow-xl shadow-black/40"
           >
             <div>
               <p
-                class="text-[11px] uppercase tracking-[0.2em] text-slate-400 mb-1"
+                class="text-[11px] uppercase tracking-[0.16em] text-slate-400 mb-1"
               >
                 Visão geral (mock)
               </p>
-              <h2 class="text-base font-semibold">
-                Seu laboratório de entrevistas técnicas
+              <h2 class="text-base md:text-lg font-semibold text-slate-50">
+                Seu painel de treino de entrevistas
               </h2>
               <p class="text-xs text-slate-400 mt-1 max-w-xl">
-                Esses dados são apenas um mock para demonstrar o tipo de visão
-                que você poderia ter após várias sessões reais de treino com a
-                IA.
+                Esses números são apenas um exemplo de como suas sessões reais
+                podem ser acompanhadas: frequência, tipo de pergunta e
+                recomendações da IA.
               </p>
             </div>
             <div
-              class="flex items-center gap-3 text-xs text-slate-300 mt-3 md:mt-0"
+              class="flex items-center gap-3 text-xs text-slate-300 mt-2 md:mt-0"
             >
               <div class="text-right">
                 <p class="text-slate-400">Último treino</p>
                 <p class="font-semibold">Ontem · 23 min</p>
               </div>
               <div
-                class="w-10 h-10 rounded-full bg-emerald-400/15 border border-emerald-400/70 flex items-center justify-center text-emerald-200"
+                class="w-9 h-9 rounded-full bg-emerald-400/15 border border-emerald-400/70 flex items-center justify-center text-emerald-200 text-xs"
               >
                 ●
               </div>
             </div>
           </section>
 
-          <!-- Cards + Charts -->
+          <!-- Cards + charts -->
           <section class="grid gap-4 lg:grid-cols-3">
-            <!-- Card 1: sessões -->
+            <!-- Card 1 -->
             <article
-              class="rounded-2xl border border-slate-700/80 bg-slate-950/85 p-4 flex flex-col gap-3"
+              class="rounded-2xl border border-slate-700/80 bg-slate-950/85 p-4 flex flex-col gap-3 shadow-lg shadow-black/40 hover:border-emerald-400/70 transition"
             >
               <div class="flex items-center justify-between">
                 <h3
@@ -188,37 +242,36 @@
                 >
               </div>
 
-              <!-- mini gráfico de barras -->
               <div class="mt-1 flex items-end gap-1 h-20">
                 <div
                   class="flex-1 bg-slate-800/80 rounded-full overflow-hidden flex items-end justify-center"
                 >
-                  <div class="w-2/3 bg-emerald-400/80 rounded-t-full h-2/5"></div>
+                  <div class="w-2/3 bg-emerald-400 rounded-t-full h-2/5"></div>
                 </div>
                 <div
                   class="flex-1 bg-slate-800/80 rounded-full overflow-hidden flex items-end justify-center"
                 >
-                  <div class="w-2/3 bg-emerald-400/80 rounded-t-full h-3/5"></div>
+                  <div class="w-2/3 bg-emerald-400 rounded-t-full h-3/5"></div>
                 </div>
                 <div
                   class="flex-1 bg-slate-800/80 rounded-full overflow-hidden flex items-end justify-center"
                 >
-                  <div class="w-2/3 bg-emerald-400/80 rounded-t-full h-4/5"></div>
+                  <div class="w-2/3 bg-emerald-400 rounded-t-full h-4/5"></div>
                 </div>
                 <div
                   class="flex-1 bg-slate-800/80 rounded-full overflow-hidden flex items-end justify-center"
                 >
-                  <div class="w-2/3 bg-emerald-400/80 rounded-t-full h-[90%]"></div>
+                  <div class="w-2/3 bg-emerald-400 rounded-t-full h-[90%]"></div>
                 </div>
               </div>
               <p class="text-[11px] text-slate-400">
-                Crescimento de prática ao longo da última semana.
+                Volume de entrevistas ao longo da semana (exemplo).
               </p>
             </article>
 
-            <!-- Card 2: stack foco -->
+            <!-- Card 2 -->
             <article
-              class="rounded-2xl border border-slate-700/80 bg-slate-950/85 p-4 flex flex-col gap-3"
+              class="rounded-2xl border border-slate-700/80 bg-slate-950/85 p-4 flex flex-col gap-3 shadow-lg shadow-black/40 hover:border-emerald-400/70 transition"
             >
               <div class="flex items-center justify-between">
                 <h3
@@ -228,7 +281,6 @@
                 </h3>
               </div>
 
-              <!-- gráfico de donut fake -->
               <div class="flex items-center gap-4">
                 <div
                   class="relative w-20 h-20 rounded-full bg-slate-800/90 flex items-center justify-center"
@@ -244,7 +296,7 @@
                       cx="16"
                       cy="16"
                       r="14"
-                      stroke="rgba(56,189,248,0.9)"
+                      stroke="rgba(56,189,248,0.95)"
                       stroke-width="3"
                       stroke-dasharray="40 60"
                       fill="transparent"
@@ -253,7 +305,7 @@
                       cx="16"
                       cy="16"
                       r="14"
-                      stroke="rgba(52,211,153,0.9)"
+                      stroke="rgba(52,211,153,0.95)"
                       stroke-width="3"
                       stroke-dasharray="25 75"
                       stroke-dashoffset="-40"
@@ -276,15 +328,15 @@
                     35% comportamentais
                   </p>
                   <p class="text-slate-400">
-                    13% gerais (cultura, expectativas, salário)
+                    13% gerais (fit cultural, expectativas, salário)
                   </p>
                 </div>
               </div>
             </article>
 
-            <!-- Card 3: recomendações -->
+            <!-- Card 3 -->
             <article
-              class="rounded-2xl border border-slate-700/80 bg-slate-950/85 p-4 flex flex-col gap-3"
+              class="rounded-2xl border border-slate-700/80 bg-slate-950/85 p-4 flex flex-col gap-3 shadow-lg shadow-black/40 hover:border-emerald-400/70 transition"
             >
               <div class="flex items-center justify-between">
                 <h3
@@ -294,26 +346,53 @@
                 </h3>
               </div>
               <ul class="text-[11px] text-slate-300 space-y-1">
-                <li>• Trabalhar exemplos de projetos pessoais.</li>
+                <li>• Explorar mais projetos pessoais no portfólio.</li>
                 <li>
-                  • Reforçar respostas sobre trabalho em equipe e feedbacks
-                  recebidos.
+                  • Trazer exemplos de trabalho em equipe e feedback recebido.
                 </li>
                 <li>
-                  • Treinar apresentação inicial (“Quem é você?”) em 60 segundos.
+                  • Treinar pitch de “Quem é você?” em menos de 60 segundos.
                 </li>
               </ul>
               <button
                 data-start-training
-                class="mt-2 self-start px-3 py-1.5 rounded-full text-[11px] font-semibold bg-emerald-400 text-slate-900 shadow-md shadow-emerald-500/40"
+                class="mt-2 self-start px-3 py-1.5 rounded-full text-[11px] font-semibold bg-emerald-400 text-slate-900 shadow-md shadow-emerald-500/40 hover:bg-emerald-300 transition"
               >
                 Começar agora
               </button>
             </article>
+
+            <!-- Card de gráficos -->
+            <article
+              class="lg:col-span-3 mt-1 rounded-2xl border border-slate-700/80 bg-slate-950/85 p-4 shadow-lg shadow-black/40"
+            >
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h3
+                    class="text-[11px] uppercase tracking-[0.18em] text-slate-400"
+                  >
+                    Evolução do treino (mock)
+                  </h3>
+                  <p class="text-xs text-slate-400 mt-1">
+                    Exemplo de como as entrevistas podem ser acompanhadas ao
+                    longo das semanas.
+                  </p>
+                </div>
+              </div>
+
+              <div class="grid gap-4 md:grid-cols-3">
+                <div class="md:col-span-2">
+                  <canvas id="sessionsChart" class="w-full h-40"></canvas>
+                </div>
+                <div class="md:col-span-1">
+                  <canvas id="skillsChart" class="w-full h-40"></canvas>
+                </div>
+              </div>
+            </article>
           </section>
         </div>
 
-        <!-- ========== TREINAMENTO / CHAT ========== -->
+        <!-- TREINAMENTO -->
         <div
           id="training-screen"
           class="hidden max-w-6xl mx-auto px-4 py-6 space-y-4"
@@ -331,14 +410,13 @@
                 ← Voltar para dashboard
               </button>
               <h2
-                class="mt-1 text-lg font-semibold tracking-[0.18em] uppercase text-slate-100"
+                class="mt-1 text-base md:text-lg font-semibold tracking-[0.18em] uppercase text-slate-100"
               >
                 Sessão de treinamento
               </h2>
               <p class="text-xs text-slate-400 mt-1 max-w-xl">
-                Configure a vaga e treine com a IA como se estivesse em uma
-                entrevista real. As estatísticas ao lado são atualizadas conforme
-                você responde.
+                Configure a vaga e responda como se estivesse em uma entrevista
+                real. A IA faz perguntas coerentes, aprofunda e traz feedback.
               </p>
             </div>
 
@@ -352,11 +430,11 @@
 
           <!-- grid -->
           <main
-            class="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] items-start"
+            class="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] grid-cols-1 items-start"
           >
-            <!-- Config -->
+            <!-- Config card -->
             <section
-              class="bg-slate-950/80 border border-slate-700/80 rounded-2xl p-4 space-y-4"
+              class="bg-slate-950/80 border border-slate-700/80 rounded-2xl p-4 space-y-4 shadow-xl shadow-black/40"
             >
               <div>
                 <p
@@ -366,8 +444,8 @@
                 </p>
                 <h3 class="text-sm font-semibold">Configuração da sessão</h3>
                 <p class="text-xs text-slate-400 mt-1">
-                  Esses dados ajudam a IA a adaptar perguntas e exemplos ao tipo
-                  de vaga que você quer.
+                  Esses dados ajudam a IA a adaptar perguntas, nível de
+                  profundidade e exemplos ao seu contexto.
                 </p>
               </div>
 
@@ -426,7 +504,7 @@
               <button
                 id="start-btn"
                 type="button"
-                class="mt-2 w-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 text-xs font-semibold py-2 shadow-lg shadow-emerald-500/40"
+                class="mt-2 w-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 text-xs font-semibold py-2 shadow-lg shadow-emerald-500/40 hover:from-emerald-300 hover:to-emerald-400 transition"
               >
                 Começar entrevista
               </button>
@@ -447,9 +525,9 @@
               </div>
             </section>
 
-            <!-- Chat -->
+            <!-- Chat card -->
             <section
-              class="bg-slate-950/90 border border-slate-700/80 rounded-2xl p-4 flex flex-col"
+              class="bg-slate-950/90 border border-slate-700/80 rounded-2xl p-4 flex flex-col shadow-xl shadow-black/40"
             >
               <header
                 class="flex items-start justify-between gap-3 mb-3 border-b border-slate-700/80 pb-3"
@@ -460,10 +538,12 @@
                   >
                     Entrevista ativa
                   </p>
-                  <h3 class="text-sm font-semibold">Entrevistador IA</h3>
+                  <h3 class="text-sm font-semibold text-slate-50">
+                    Entrevistador IA
+                  </h3>
                   <p class="text-xs text-slate-400 mt-1">
-                    Responda como se estivesse em uma entrevista real. A IA
-                    avalia e segue com a próxima pergunta.
+                    Responda com calma. A IA sempre traz a próxima pergunta e,
+                    quando fizer sentido, comenta pontos fortes e melhorias.
                   </p>
                 </div>
                 <div
@@ -476,7 +556,7 @@
 
               <div
                 id="messages"
-                class="flex-1 min-h-[220px] max-h-[420px] overflow-y-auto space-y-2 pr-1"
+                class="flex-1 min-h-[220px] max-h-[420px] overflow-y-auto space-y-2 pr-1 text-[13px]"
               ></div>
 
               <form
@@ -486,7 +566,7 @@
                 <textarea
                   id="answer-input"
                   rows="3"
-                  placeholder="Escreva sua resposta aqui..."
+                  placeholder="Escreva sua resposta aqui…"
                   class="w-full rounded-2xl border border-slate-700/80 bg-slate-900/90 px-3 py-2 text-xs text-slate-50 placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 resize-y min-h-[80px] max-h-[180px]"
                 ></textarea>
 
@@ -494,12 +574,12 @@
                   class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <span class="text-[11px] text-slate-400">
-                    Dica: cite contexto, ação e resultado. Exemplos concretos
-                    fortalecem sua resposta.
+                    Dica: use contexto → ação → resultado. Isso deixa a resposta
+                    muito mais forte.
                   </span>
                   <button
                     type="submit"
-                    class="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 text-xs font-semibold px-4 py-2 shadow-md shadow-emerald-500/40"
+                    class="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 text-xs font-semibold px-4 py-2 shadow-md shadow-emerald-500/40 hover:from-emerald-300 hover:to-emerald-400 transition"
                   >
                     Enviar resposta
                   </button>
@@ -513,7 +593,7 @@
       </div>
     </div>
 
-    <!-- ========== MODAL DE CONFIGURAÇÃO INICIAL ========== -->
+    <!-- MODAL CONFIG INICIAL -->
     <div
       id="config-modal"
       class="fixed inset-0 z-30 hidden"
@@ -526,7 +606,7 @@
       ></div>
 
       <div
-        class="relative max-w-md w-full mx-auto mt-24 bg-slate-950/95 border border-slate-700/80 rounded-2xl p-5 shadow-2xl"
+        class="relative max-w-md w-full mx-auto mt-24 bg-slate-950/95 border border-slate-700/80 rounded-2xl p-5 shadow-2xl shadow-black/70"
       >
         <div class="flex items-start justify-between gap-3 mb-3">
           <div>
@@ -539,14 +619,14 @@
               Configurar sessão de entrevista
             </h2>
             <p class="text-xs text-slate-400 mt-1">
-              Essas informações serão usadas para gerar a primeira pergunta da
-              entrevista.
+              Essas informações serão usadas para a primeira pergunta e o tom da
+              conversa.
             </p>
           </div>
           <button
             id="modal-close-btn"
             type="button"
-            class="w-8 h-8 rounded-full bg-slate-900/95 border border-slate-700 text-slate-400 text-sm"
+            class="w-8 h-8 rounded-full bg-slate-900/95 border border-slate-700 text-slate-400 text-sm hover:text-slate-100 hover:border-slate-500 transition"
           >
             ✕
           </button>
@@ -602,8 +682,7 @@
           </label>
 
           <p class="text-[11px] text-slate-400">
-            Você poderá ajustar essas informações novamente dentro da sessão, se
-            quiser.
+            Você pode ajustar esses dados depois, se mudar de ideia.
           </p>
         </div>
 
@@ -611,7 +690,7 @@
           <button
             id="modal-start-btn"
             type="button"
-            class="rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 text-xs font-semibold px-4 py-2 shadow-lg shadow-emerald-500/40"
+            class="rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 text-xs font-semibold px-4 py-2 shadow-lg shadow-emerald-500/40 hover:from-emerald-300 hover:to-emerald-400 transition"
           >
             Começar entrevista
           </button>

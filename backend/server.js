@@ -1,31 +1,27 @@
 // backend/server.js
-require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 
-const interviewRoutes = require("./src/routes/interviewRoutes");
+// carrega variáveis de ambiente
+require("dotenv").config({ path: path.join(__dirname, ".env") });
+
+const interviewRoute = require("./src/routes/interviewRoutes");
 
 const app = express();
-const PORT = process.env.PORT || 4002;
 
-// middlewares
 app.use(cors());
 app.use(express.json());
 
-// rota de teste
-app.get("/", (req, res) => {
-  res.json({ message: "API de Entrevista IA está rodando 👋" });
+// saúde / teste rápido
+app.get("/", (_req, res) => {
+  res.json({ ok: true, message: "HireMind AI backend ok" });
 });
 
 // rotas da IA
-app.use("/api", interviewRoutes);
+app.use("/api", interviewRoute);
 
-// middleware simples de erro
-app.use((err, req, res, next) => {
-  console.error("Erro:", err);
-  res.status(500).json({ message: "Erro interno do servidor." });
-});
-
+const PORT = process.env.PORT || 4002;
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando na porta ${PORT}`);
+  console.log(`API HireMind AI rodando na porta ${PORT}`);
 });
